@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday ❤️</title>
+
+<link rel="stylesheet" href="file/default.css">
+<script src="file/jquery.min.js"></script>
+<script src="file/jscex.min.js"></script>
+<script src="file/jscex-parser.js"></script>
+<script src="file/jscex-jit.js"></script>
+<script src="file/jscex-builderbase.min.js"></script>
+<script src="file/jscex-async.min.js"></script>
+<script src="file/jscex-async-powerpack.min.js"></script>
+<script src="file/function.js"></script>
+<script src="file/love.js"></script>
+
+<style>
+body {
+    margin: 0;
+    background: #ffe;
+    overflow: hidden;
+}
+
+#wrap {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+#code {
+    display: none;
+    position: absolute;
+    top: 80px;
+    left: 50px;
+    font-size: 20px;
+    color: #d6336c;
+    font-family: cursive;
+}
+
+.say { display: block; }
+
+/* 🎂 Cake */
+#cake {
+    display: none;
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.plate {
+    width: 200px;
+    height: 20px;
+    background: #ddd;
+    border-radius: 50%;
+    margin: auto;
+}
+
+.layer {
+    width: 180px;
+    height: 40px;
+    margin: auto;
+    border-radius: 10px;
+}
+
+.layer-bottom { background: #ff9aa2; }
+.layer-middle { background: #ffb7b2; margin-top: -5px; }
+.layer-top { background: #ffdac1; margin-top: -5px; }
+
+.candle {
+    width: 12px;
+    height: 40px;
+    background: white;
+    margin: auto;
+    position: relative;
+    top: -45px;
+    border-radius: 4px;
+}
+
+.flame {
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle, #fff, #ff9800, #ff5722);
+    border-radius: 50%;
+    position: absolute;
+    top: -14px;
+    left: -1px;
+    animation: flicker 0.15s infinite alternate;
+    box-shadow: 0 0 20px rgba(255,140,0,0.9);
+}
+
+@keyframes flicker {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.2) translateY(-2px); }
+}
+</style>
+</head>
+
+<body>
+
+<audio id="myAudio">
+    <source src="aud.mp3" type="audio/mp3">
+</audio>
+
+<div id="wrap">
+
+    <div id="code">
+        <span class="say">Hey you 💞</span>
+        <span class="say">Happy Birthday 🎂</span>
+        <span class="say">May God bless you 🍀</span>
+        <span class="say">Lots of happiness & love ❤️</span>
+        <span class="say">You mean more than words 💖</span>
+    </div>
+
+    <canvas id="canvas" width="1100" height="680"></canvas>
+
+    <!-- Cake -->
+    <div id="cake">
+        <div class="plate"></div>
+        <div class="layer layer-bottom"></div>
+        <div class="layer layer-middle"></div>
+        <div class="layer layer-top"></div>
+        <div class="candle">
+            <div class="flame"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function playAudio() {
+    document.getElementById("myAudio").play();
+}
+
+(function () {
+    var canvas = $('#canvas');
+    var width = canvas.width();
+    var height = canvas.height();
+    var tree = new Tree(canvas[0], width, height, opts = {
+        seed: { x: width/2, color: "rgb(190,26,37)", scale: 2 },
+        branch: [[535,680,570,250,500,200,30,100]],
+        bloom: { num: 700, width: 1080, height: 650 }
+    });
+
+    var seed = tree.seed;
+    var hold = 1;
+
+    canvas.click(function () {
+        playAudio();
+        hold = 0;
+    });
+
+    var seedAnimate = eval(Jscex.compile("async", function () {
+        seed.draw();
+        while (hold) { $await(Jscex.Async.sleep(10)); }
+        while (seed.canScale()) {
+            seed.scale(0.95);
+            $await(Jscex.Async.sleep(10));
+        }
+        while (seed.canMove()) {
+            seed.move(0, 2);
+            $await(Jscex.Async.sleep(10));
+        }
+    }));
+
+    var growAnimate = eval(Jscex.compile("async", function () {
+        do {
+            tree.grow();
+            $await(Jscex.Async.sleep(10));
+        } while (tree.canGrow());
+    }));
+
+    var flowAnimate = eval(Jscex.compile("async", function () {
+        do {
+            tree.flower(2);
+            $await(Jscex.Async.sleep(10));
+        } while (tree.canFlower());
+    }));
+
+    var textAnimate = eval(Jscex.compile("async", function () {
+        $("#code").fadeIn(2000).typewriter();
+        $("#cake").fadeIn(3000);
+    }));
+
+    var runAsync = eval(Jscex.compile("async", function () {
+        $await(seedAnimate());
+        $await(growAnimate());
+        $await(flowAnimate());
+        $await(textAnimate());
+    }));
+
+    runAsync().start();
+})();
+</script>
+
+</body>
+</html>
+
